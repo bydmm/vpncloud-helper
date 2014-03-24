@@ -1,0 +1,14 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    colorize (0.5.8)
+    ffi (1.9.0)
+    net-ping (1.6.1)
+      ffi (>= 1.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  colorize
+  net-ping
