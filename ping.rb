@@ -1,42 +1,58 @@
 require 'net/ping'
 require 'colorize'
 
-def ping url
-  sum = 0
-  bugs = 0
-  5.times do
-    from = Time.now
-    pt = Net::Ping::External.new(url)
-    if pt.ping 
-      cost = Time.now - from
-      sum = sum + cost * 1000
-    else
-      if bugs == 0
-        puts "ping #{url}: #{pt.exception}".colorize( :yellow )
-      end
-      bugs = bugs + 1
+class VpnTest
+  def test
+    domains.each do |domain|
+      ping(domain)
     end
   end
-  sum = (sum / 5).round
-  outputs = "ping #{url} : #{sum}ms, failed: #{bugs}.times"
-  if bugs == 0
-    puts outputs.colorize( :green )
-  elsif bugs > 1 and bugs < 5
-    puts outputs.colorize( :yellow )
-  elsif bugs == 5
-    puts outputs.colorize( :red )
+
+  private
+
+  def ping(url)
+    sum = 0
+    bugs = 0
+    5.times do
+      from = Time.now
+      pt = Net::Ping::External.new(url)
+      if pt.ping
+        sum += (Time.now - from) * 1000
+      else
+        puts "ping #{url}: #{pt.exception}".colorize(:yellow)
+        bugs += 1
+      end
+    end
+    outputs = "ping #{url} : #{(sum / 5).round}ms, failed: #{bugs}.times"
+    color =
+      if bugs == 0
+        :green
+      elsif bugs > 1 && bugs < 5
+        :yellow
+      elsif bugs == 5
+        :red
+      end
+    puts outputs.colorize(color)
+  end
+
+  def domains
+    host = 'example.com' # You Vpn Host name
+    vpns =
+      %w(us1 us2 us3 jp1 jp2 jp3 sg1 hk1 hk2 uk1).map do |name|
+        "#{name}.#{host}"
+      end
+    vpns << 'www.baidu.com'
   end
 end
 
 class SwitchIp
-
-  def go vpn_name
+  def go(vpn_name)
     turn_off vpn_name
     sleep 3
     turn_on vpn_name
   end
 
-  def turn_on vpn_name
+  def turn_on(vpn_name)
     system "/usr/bin/env osascript <<-EOF
         tell application \"System Events\"
           tell current location of network preferences
@@ -45,10 +61,9 @@ class SwitchIp
         end tell
       end tell
     EOF"
-
   end
 
-  def turn_off vpn_name
+  def turn_off(vpn_name)
     system "/usr/bin/env osascript <<-EOF
       tell application \"System Events\"
         tell current location of network preferences
@@ -58,23 +73,12 @@ class SwitchIp
     end tell
    EOF"
   end
-
 end
 
-ping "www.baidu.com"
-ping 'us1.example.com'
-ping 'us2.example.com'
-ping 'us3.example.com'
-ping 'jp1.example.com'
-ping 'jp2.example.com'
-ping 'jp3.example.com'
-ping 'sg1.example.com'
-ping 'hk1.example.com'
-ping 'hk2.example.com'
-ping 'uk1.example.com'
-
-puts "Which VPN would you like?"
+vpn = VpnTest.new
+vpn.test
+puts 'Which VPN would you like?'
 vpn_name = gets.strip
 puts "Connecting to #{vpn_name}......"
-vpn = SwitchIp.new
-vpn.go vpn_name
+ip = SwitchIp.new
+ip.go vpn_name
