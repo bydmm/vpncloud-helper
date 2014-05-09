@@ -31,3 +31,5 @@ ping uk1.example.com : 400ms, failed: 0.times
 ## 2013-12-11
 
 Fixed vpnclound address.
+
+[![Code Climate](https://codeclimate.com/github/bydmm/vpncloud-helper.png)](https://codeclimate.com/github/bydmm/vpncloud-helper)
